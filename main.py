@@ -16,12 +16,9 @@ from app.models.users import (
 
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
-
-logger = logging.getLogger(__name__)
+# Réutilise la config d'uvicorn : format, niveau et handlers déjà en place.
+# Évite de reconfigurer le root logger et de polluer les logs tiers.
+logger = logging.getLogger("uvicorn.error")
 
 app = FastAPI()
 
