@@ -24,6 +24,12 @@ uv sync
 
 Creates `.venv` and installs dependencies from `pyproject.toml` / `uv.lock`.
 
+Include dev dependencies (pytest) with:
+
+```bash
+uv sync --dev
+```
+
 ## Run it
 
 
@@ -32,10 +38,11 @@ Creates `.venv` and installs dependencies from `pyproject.toml` / `uv.lock`.
 | Enter (activate)   | `source .venv/bin/activate` |                      |
 | Add a package      | `uv add <package-name>`*    |                      |
 | Run the applicaton | `fastapi dev`               | `uv run fastapi dev` |
+| Run tests          | `pytest`                    | `uv run pytest`      |
 | Exit (deactivate)  | `deactivate`                |                      |
 
 
-`* uv add` updates `pyproject.toml` and `uv.lock`; run it from the project root (venv activated or not).
+`*` `uv add` updates `pyproject.toml` and `uv.lock`; run it from the project root (venv activated or not).
 
 ### Links
 
@@ -63,6 +70,20 @@ Creates `.venv` and installs dependencies from `pyproject.toml` / `uv.lock`.
 
 Use **Try it out** in `/docs` to exercise the endpoints.
 
+## Tests
+
+Pydantic model tests live under `tests/` (e.g. `tests/test_user_model.py` for the `User` model).
+
+
+| Action         | With venv                         | Without venv                             |
+| -------------- | --------------------------------- | ---------------------------------------- |
+| Run all tests  | `pytest`                          | `uv run pytest`                          |
+| Run one file   | `pytest tests/test_user_model.py` | `uv run pytest tests/test_user_model.py` |
+| Verbose output | `pytest -v`                       | `uv run pytest -v`                       |
+
+
+Requires dev dependencies (`pytest`). Install them with `uv sync --dev` if you only ran `uv sync` before.
+
 ## Project layout
 
 ```
@@ -70,6 +91,8 @@ fastapi_store/
 ├── .venv/                  # created by uv sync (gitignored)
 ├── app/
 │   └── models/users.py
+├── tests/
+│   └── test_user_model.py
 ├── main.py
 ├── pyproject.toml
 └── uv.lock
