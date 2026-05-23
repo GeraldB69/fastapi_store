@@ -1,13 +1,12 @@
 # FastAPI Store
 
-A minimal **FastAPI** learning project that exposes a versioned REST API for **users**. Data is stored in an in-memory list (no database yet), which keeps the codebase small while demonstrating common patterns:
+A **FastAPI** e-commerce backend project. Data is stored in memory (no database yet), focused on learning FastAPI patterns:
 
-- Pydantic models for request/response validation (`User`, `CreateUser`, `UpdateUser`, `UserReplace`)
+- Pydantic schemas per use case (`User`, `CreateUser`, `UpdateUser`, `UserReplace`, same for `Product`)
 - REST conventions: `POST` (create), `GET` (list & detail), `PATCH` (partial update), `PUT` (full replace), `DELETE`
-- UUIDs in URL paths (not list indices)
+- UUIDs in URL paths, `Decimal` for prices, soft delete on products
+- `APIRouter` per domain — equivalent of Django's `include()` in `urls.py`
 - OpenAPI documentation with grouped routes (`tags`) and documented `404` responses
-
-The app entry point is `main.py` at the repository root. Static files and Jinja2 templates are wired for future UI work.
 
 ## Requirements
 
@@ -57,7 +56,6 @@ uv sync --dev
 
 ### User API (`/api/v1/users`)
 
-
 | Method   | Path                      | Description                                  |
 | -------- | ------------------------- | -------------------------------------------- |
 | `GET`    | `/api/v1/users`           | List all users                               |
@@ -65,14 +63,30 @@ uv sync --dev
 | `GET`    | `/api/v1/users/{user_id}` | Get one user by UUID                         |
 | `PATCH`  | `/api/v1/users/{user_id}` | Partial update                               |
 | `PUT`    | `/api/v1/users/{user_id}` | Full replacement                             |
-| `DELETE` | `/api/v1/users/{user_id}` | Delete user (`204`)                          |
+| `DELETE` | `/api/v1/users/{user_id}` | Hard delete (`204`)                          |
+
+### Product API (`/api/v1/products`)
+
+| Method   | Path                            | Description                                      |
+| -------- | ------------------------------- | ------------------------------------------------ |
+| `GET`    | `/api/v1/products`              | List all products (`?active_only=true` to filter)|
+| `POST`   | `/api/v1/products`              | Create a product (`201`)                         |
+| `GET`    | `/api/v1/products/{product_id}` | Get one product by UUID                          |
+| `PATCH`  | `/api/v1/products/{product_id}` | Partial update (use to deactivate)               |
+| `PUT`    | `/api/v1/products/{product_id}` | Full replacement                                 |
+| `DELETE` | `/api/v1/products/{product_id}` | Soft delete — sets `is_active=false` (`204`)     |
 
 
 Use **Try it out** in `/docs` to exercise the endpoints.
 
 ## Tests
 
-Pydantic model tests live under `tests/` (e.g. `tests/test_user_model.py` for the `User` model).
+Pydantic model tests live under `tests/`.
+
+| File | Covers |
+| ---- | ------ |
+| `tests/test_user_model.py` | `User` model |
+| `tests/test_product_model.py` | `Product` model |
 
 
 | Action         | With venv                         | Without venv                             |
@@ -90,11 +104,16 @@ Requires dev dependencies (`pytest`). Install them with `uv sync --dev` if you o
 fastapi_store/
 ├── .venv/                  # created by uv sync (gitignored)
 ├── app/
-│   └── models/users.py
+│   ├── models/
+│   │   ├── users.py        # User, CreateUser, UpdateUser, UserReplace
+│   │   └── products.py     # Product, CreateProduct, UpdateProduct, ProductReplace
+│   └── routers/
+│       ├── users.py        # CRUD /api/v1/users
+│       └── products.py     # CRUD /api/v1/products (soft delete)
 ├── tests/
-│   └── test_user_model.py
-├── main.py
+│   ├── test_user_model.py
+│   └── test_product_model.py
+├── main.py                 # app entry point — mounts routers only
 ├── pyproject.toml
 └── uv.lock
 ```
-

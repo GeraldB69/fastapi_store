@@ -14,7 +14,7 @@ class Role(str, Enum):
     customer = "customer"
 
 
-# Modèle de réponse : ressource complète telle que stockée et renvoyée par l'API.
+# Response model: full resource as stored and returned by the API.
 class User(BaseModel):
     id: UUID
     first_name: str
@@ -23,7 +23,7 @@ class User(BaseModel):
     roles: List[Role]
 
 
-# Corps de POST : champs requis, sans id (généré côté serveur).
+# POST body: required fields, no id (server-generated).
 class CreateUser(BaseModel):
     first_name: str
     last_name: str
@@ -31,7 +31,7 @@ class CreateUser(BaseModel):
     roles: List[Role]
 
 
-# Corps de PATCH : tous les champs optionnels ; seuls ceux envoyés sont appliqués.
+# PATCH body: all fields optional — only sent fields are applied.
 class UpdateUser(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -39,7 +39,7 @@ class UpdateUser(BaseModel):
     roles: Optional[List[Role]] = None
 
 
-# Corps de PUT : même forme que CreateUser (remplacement complet, id uniquement dans l'URL).
+# PUT body: full replacement, no id (comes from URL only).
 class UserReplace(BaseModel):
     first_name: str
     last_name: str
