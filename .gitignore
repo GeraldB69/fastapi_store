@@ -1,0 +1,81 @@
+# ---------------------------------------------------
+# Python
+# ---------------------------------------------------
+# Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Packages, installers, builds
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+*.whl
+wheels/
+
+# Virtual environment (uv creates it)
+.venv/
+
+# Environment variables (contains often secrets)
+.env
+.env.*
+!.env.example
+
+# Local logs and databases
+*.log
+*.sqlite3
+*.db
+
+# ---------------------------------------------------
+# uv (dependency manager)
+# ---------------------------------------------------
+# We keep uv.lock (reproducible), so not in the gitignore
+# However, we can ignore the eventual cache
+.uv/
+
+# ---------------------------------------------------
+# FastAPI / web applications
+# ---------------------------------------------------
+# Static files compiled or downloaded (if present)
+staticfiles/
+media/
+
+# Temporary upload folders
+uploads/
+tmp/
+
+# ---------------------------------------------------
+# Cursor / VSCode
+# ---------------------------------------------------
+# Editor configuration (generally personal)
+# In practice, we ignore all .vscode/ and .cursor/ to avoid conflicts
+.vscode/
+.cursor/
+
+# IDE configuration files
+*.swp
+*.swo
+*~
+.idea/         # if ever opened with PyCharm
+.history/      # local history extensions
+.DS_Store      # macOS files
+Thumbs.db      # Windows files
+
+# ---------------------------------------------------
+# Tests and coverage
+# ---------------------------------------------------
+.coverage
+htmlcov/
+.pytest_cache/
+*.cover
+
+# ---------------------------------------------------
+# Other
+# ---------------------------------------------------
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Temporary files from the OS
+*.bak
