@@ -1,6 +1,6 @@
-# FastAPI Store [Work in progress]
+# FastAPI Store
 
-> **Learning project** — FastAPI e-commerce backend built step by step, without a database (in-memory store). Each iteration introduces a new FastAPI pattern.
+> **Learning project :** Each iteration introduces a new pattern. Work in progress...
 
 A **FastAPI** e-commerce backend project. Data is stored in memory (no database yet), focused on learning FastAPI patterns:
 
@@ -142,3 +142,4 @@ fastapi_store/
 - [ ] **Database** — replace in-memory store with SQLAlchemy + Alembic migrations
 - [ ] **Authentication** — JWT-based auth, `get_current_user` dependency
 - [ ] **Pagination** — query params (`limit`, `offset`) on list endpoints
+- [ ] **Frontend (monorepo)** — add a `frontend/` folder (Vue.js + Vite) alongside `backend/`
