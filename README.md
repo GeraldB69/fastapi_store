@@ -1,4 +1,6 @@
-# FastAPI Store
+# FastAPI Store [Work in progress]
+
+> **Learning project** — FastAPI e-commerce backend built step by step, without a database (in-memory store). Each iteration introduces a new FastAPI pattern.
 
 A **FastAPI** e-commerce backend project. Data is stored in memory (no database yet), focused on learning FastAPI patterns:
 
@@ -85,8 +87,10 @@ Pydantic model tests live under `tests/`.
 
 | File | Covers |
 | ---- | ------ |
-| `tests/test_user_model.py` | `User` model |
-| `tests/test_product_model.py` | `Product` model |
+| `tests/test_user_model.py` | `User` model — unit |
+| `tests/test_product_model.py` | `Product` model — unit |
+| `tests/test_users_router.py` | User routes — integration |
+| `tests/test_products_router.py` | Product routes — integration |
 
 
 | Action         | With venv                         | Without venv                             |
@@ -112,8 +116,29 @@ fastapi_store/
 │       └── products.py     # CRUD /api/v1/products (soft delete)
 ├── tests/
 │   ├── test_user_model.py
-│   └── test_product_model.py
+│   ├── test_product_model.py
+│   ├── test_users_router.py
+│   └── test_products_router.py
 ├── main.py                 # app entry point — mounts routers only
 ├── pyproject.toml
 └── uv.lock
 ```
+
+## Roadmap
+
+### Done
+- [X] `User` — full CRUD, unit + integration tests
+- [X] `Product` — full CRUD, soft delete, `?active_only` filter, unit + integration tests
+- [X] `APIRouter` per domain, `Decimal` for prices
+- [X] In-memory store with test isolation (pytest fixtures)
+
+### Next
+- [ ] **Cart** — add/remove items, link to User and Product (UUID references)
+- [ ] **Order** — place order from cart, stock check, price snapshot, order status
+- [ ] **Service layer** — cross-domain business logic (stock management, order lifecycle)
+- [ ] **`Depends()`** — FastAPI dependency injection (shared resource lookups, future auth)
+
+### Later
+- [ ] **Database** — replace in-memory store with SQLAlchemy + Alembic migrations
+- [ ] **Authentication** — JWT-based auth, `get_current_user` dependency
+- [ ] **Pagination** — query params (`limit`, `offset`) on list endpoints
