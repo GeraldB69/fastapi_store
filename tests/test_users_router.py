@@ -1,10 +1,9 @@
-from decimal import Decimal
 from uuid import uuid4
 
 import pytest
 from fastapi.testclient import TestClient
 
-from app.models.users import Gender, Role, User
+from app.models.users import Gender, Role, UserResponse
 from app.routers.users import users_db
 from main import app
 
@@ -16,8 +15,8 @@ def reset_users_db():
     """Reset the in-memory store to a known state before each test."""
     users_db.clear()
     users_db.extend([
-        User(id=uuid4(), first_name="John", last_name="Doe", gender=Gender.male, roles=[Role.admin]),
-        User(id=uuid4(), first_name="Jane", last_name="Doe", gender=Gender.female, roles=[Role.customer]),
+        UserResponse(id=uuid4(), first_name="John", last_name="Doe", gender=Gender.male, roles=[Role.admin]),
+        UserResponse(id=uuid4(), first_name="Jane", last_name="Doe", gender=Gender.female, roles=[Role.customer]),
     ])
     yield
     users_db.clear()
@@ -51,7 +50,7 @@ class TestGetUser:
         assert response.status_code == 404
 
 
-class TestCreateUser:
+class TestUserCreate:
     def test_creates_user_and_returns_201(self):
         payload = {"first_name": "Alice", "last_name": "Smith", "gender": "female", "roles": ["customer"]}
 

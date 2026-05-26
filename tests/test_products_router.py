@@ -4,7 +4,7 @@ from uuid import uuid4
 import pytest
 from fastapi.testclient import TestClient
 
-from app.models.products import Category, Product
+from app.models.products import Category, ProductResponse
 from app.routers.products import products_db
 from main import app
 
@@ -16,9 +16,9 @@ def reset_products_db():
     """Reset the in-memory store to a known state before each test."""
     products_db.clear()
     products_db.extend([
-        Product(id=uuid4(), name="Laptop", price=Decimal("999.99"), stock=5, category=Category.electronics),
-        Product(id=uuid4(), name="T-shirt", price=Decimal("19.99"), stock=20, category=Category.clothing),
-        Product(id=uuid4(), name="Old item", price=Decimal("9.99"), stock=0, category=Category.other, is_active=False),
+        ProductResponse(id=uuid4(), name="Laptop", description="A laptop", price=Decimal("999.99"), stock=5, category=Category.ELECTRONICS, is_active=True),
+        ProductResponse(id=uuid4(), name="T-shirt", description="A t-shirt", price=Decimal("19.99"), stock=20, category=Category.CLOTHING, is_active=True),
+        ProductResponse(id=uuid4(), name="Old item", description=None, price=Decimal("9.99"), stock=0, category=Category.OTHER, is_active=False),
     ])
     yield
     products_db.clear()
@@ -64,24 +64,39 @@ class TestGetProduct:
 
 class TestCreateProduct:
     def test_creates_product_and_returns_201(self):
-        payload = {"name": "New Phone", "price": "599.99", "stock": 10, "category": "electronics"}
+        payload = {"name": "New Phone", "description": "Latest model", "price": "599.99", "stock": 10, "category": "electronics"}
 
         response = client.post("/api/v1/products", json=payload)
 
         assert response.status_code == 201
         data = response.json()
         assert data["name"] == "New Phone"
-        assert data["is_active"] is True  # default
+        assert data["is_active"] is False  # inactive by default
+
+    def test_creates_product_with_null_description(self):
+        payload = {"name": "Mystery item", "description": None, "price": "9.99", "stock": 3, "category": "other"}
+
+        response = client.post("/api/v1/products", json=payload)
+
+        assert response.status_code == 201
+        assert response.json()["description"] is None
+
+    def test_missing_description_returns_422(self):
+        payload = {"name": "No desc", "price": "9.99", "stock": 1, "category": "other"}
+
+        response = client.post("/api/v1/products", json=payload)
+
+        assert response.status_code == 422
 
     def test_price_zero_returns_422(self):
-        payload = {"name": "Free item", "price": "0", "stock": 5, "category": "other"}
+        payload = {"name": "Free item", "description": None, "price": "0", "stock": 5, "category": "other"}
 
         response = client.post("/api/v1/products", json=payload)
 
         assert response.status_code == 422
 
     def test_negative_stock_returns_422(self):
-        payload = {"name": "Item", "price": "9.99", "stock": -1, "category": "other"}
+        payload = {"name": "Item", "description": None, "price": "9.99", "stock": -1, "category": "other"}
 
         response = client.post("/api/v1/products", json=payload)
 
@@ -100,6 +115,15 @@ class TestPatchProduct:
         assert data["stock"] == 99
         assert data["name"] == original_name  # unchanged
 
+    def test_can_activate_via_patch(self):
+        # products_db[2] is inactive by default
+        product_id = str(products_db[2].id)
+
+        response = client.patch(f"/api/v1/products/{product_id}", json={"is_active": True})
+
+        assert response.status_code == 200
+        assert response.json()["is_active"] is True
+
     def test_can_deactivate_via_patch(self):
         product_id = str(products_db[0].id)
 
@@ -117,7 +141,7 @@ class TestPatchProduct:
 class TestReplaceProduct:
     def test_replaces_all_fields(self):
         product_id = str(products_db[0].id)
-        payload = {"name": "Replaced", "price": "1.99", "stock": 1, "category": "food", "is_active": True}
+        payload = {"name": "Replaced", "description": "New desc", "price": "1.99", "stock": 1, "category": "food", "is_active": True}
 
         response = client.put(f"/api/v1/products/{product_id}", json=payload)
 
@@ -126,8 +150,16 @@ class TestReplaceProduct:
         assert data["name"] == "Replaced"
         assert data["id"] == product_id  # id unchanged
 
-    def test_unknown_id_returns_404(self):
+    def test_missing_description_returns_422(self):
+        product_id = str(products_db[0].id)
         payload = {"name": "X", "price": "1.00", "stock": 1, "category": "other", "is_active": True}
+
+        response = client.put(f"/api/v1/products/{product_id}", json=payload)
+
+        assert response.status_code == 422
+
+    def test_unknown_id_returns_404(self):
+        payload = {"name": "X", "description": None, "price": "1.00", "stock": 1, "category": "other", "is_active": True}
 
         response = client.put(f"/api/v1/products/{uuid4()}", json=payload)
 

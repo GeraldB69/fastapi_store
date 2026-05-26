@@ -1,6 +1,5 @@
-from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from enum import Enum
 
 
@@ -15,28 +14,22 @@ class Role(str, Enum):
 
 
 # Response model: full resource as stored and returned by the API.
-class User(BaseModel):
+class UserResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: UUID
     first_name: str
     last_name: str
     gender: Gender
-    roles: List[Role]
+    roles: list[Role]
 
 
 # POST body: required fields, no id (server-generated).
-class CreateUser(BaseModel):
+class UserCreate(BaseModel):
     first_name: str
     last_name: str
     gender: Gender
-    roles: List[Role]
-
-
-# PATCH body: all fields optional — only sent fields are applied.
-class UpdateUser(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
-    gender: Optional[Gender] = None
-    roles: Optional[List[Role]] = None
+    roles: list[Role]
 
 
 # PUT body: full replacement, no id (comes from URL only).
@@ -44,4 +37,12 @@ class UserReplace(BaseModel):
     first_name: str
     last_name: str
     gender: Gender
-    roles: List[Role]
+    roles: list[Role]
+
+
+# PATCH body: all fields optional — only sent fields are applied.
+class UserUpdate(BaseModel):
+    first_name: str | None = None
+    last_name: str | None = None
+    gender: Gender | None = None
+    roles: list[Role] = []

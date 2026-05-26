@@ -4,7 +4,7 @@
 
 A **FastAPI** e-commerce backend project. Data is stored in memory (no database yet), focused on learning FastAPI patterns:
 
-- Pydantic schemas per use case (`User`, `CreateUser`, `UpdateUser`, `UserReplace`, same for `Product`)
+- Pydantic schemas per use case (`UserResponse`, `UserCreate`, `UserUpdate`, `UserReplace`, same for `Product`)
 - REST conventions: `POST` (create), `GET` (list & detail), `PATCH` (partial update), `PUT` (full replace), `DELETE`
 - UUIDs in URL paths, `Decimal` for prices, soft delete on products
 - `APIRouter` per domain — equivalent of Django's `include()` in `urls.py`
@@ -87,8 +87,8 @@ Pydantic model tests live under `tests/`.
 
 | File | Covers |
 | ---- | ------ |
-| `tests/test_user_model.py` | `User` model — unit |
-| `tests/test_product_model.py` | `Product` model — unit |
+| `tests/test_user_model.py` | `UserResponse` model — unit |
+| `tests/test_product_model.py` | `ProductResponse` model — unit |
 | `tests/test_users_router.py` | User routes — integration |
 | `tests/test_products_router.py` | Product routes — integration |
 
@@ -109,8 +109,8 @@ fastapi_store/
 ├── .venv/                  # created by uv sync (gitignored)
 ├── app/
 │   ├── models/
-│   │   ├── users.py        # User, CreateUser, UpdateUser, UserReplace
-│   │   └── products.py     # Product, CreateProduct, UpdateProduct, ProductReplace
+│   │   ├── users.py        # UserResponse, UserCreate, UserUpdate, UserReplace
+│   │   └── products.py     # ProductResponse, ProductCreate, ProductUpdate, ProductReplace
 │   └── routers/
 │       ├── users.py        # CRUD /api/v1/users
 │       └── products.py     # CRUD /api/v1/products (soft delete)

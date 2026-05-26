@@ -3,7 +3,7 @@ from uuid import UUID, uuid4
 import pytest
 from pydantic import ValidationError
 
-from app.models.users import Gender, Role, User
+from app.models.users import Gender, Role, UserResponse
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def valid_user_kwargs(user_id: UUID) -> dict:
 
 class TestUser:
     def test_create_with_enums(self, valid_user_kwargs: dict) -> None:
-        user = User(**valid_user_kwargs)
+        user = UserResponse(**valid_user_kwargs)
 
         assert user.id == valid_user_kwargs["id"]
         assert user.first_name == "Jane"
@@ -33,7 +33,7 @@ class TestUser:
         assert user.roles == [Role.customer]
 
     def test_create_coerces_string_enums(self, user_id: UUID) -> None:
-        user = User(
+        user = UserResponse(
             id=user_id,
             first_name="John",
             last_name="Doe",
@@ -45,13 +45,13 @@ class TestUser:
         assert user.roles == [Role.admin, Role.customer]
 
     def test_model_dump_and_validate_roundtrip(self, valid_user_kwargs: dict) -> None:
-        user = User(**valid_user_kwargs)
-        restored = User.model_validate(user.model_dump())
+        user = UserResponse(**valid_user_kwargs)
+        restored = UserResponse.model_validate(user.model_dump())
 
         assert restored == user
 
     def test_model_dump_json_contains_expected_fields(self, valid_user_kwargs: dict) -> None:
-        user = User(**valid_user_kwargs)
+        user = UserResponse(**valid_user_kwargs)
         data = user.model_dump(mode="json")
 
         assert data["id"] == str(valid_user_kwargs["id"])
@@ -60,7 +60,7 @@ class TestUser:
 
     def test_missing_required_field_raises(self, user_id: UUID) -> None:
         with pytest.raises(ValidationError) as exc_info:
-            User(id=user_id, first_name="Jane")
+            UserResponse(id=user_id, first_name="Jane")
 
         fields = {err["loc"][0] for err in exc_info.value.errors()}
         assert "last_name" in fields
@@ -69,7 +69,7 @@ class TestUser:
 
     def test_invalid_gender_raises(self, user_id: UUID) -> None:
         with pytest.raises(ValidationError):
-            User(
+            UserResponse(
                 id=user_id,
                 first_name="Jane",
                 last_name="Doe",
@@ -79,7 +79,7 @@ class TestUser:
 
     def test_invalid_role_raises(self, user_id: UUID) -> None:
         with pytest.raises(ValidationError):
-            User(
+            UserResponse(
                 id=user_id,
                 first_name="Jane",
                 last_name="Doe",
@@ -89,7 +89,7 @@ class TestUser:
 
     def test_invalid_uuid_raises(self) -> None:
         with pytest.raises(ValidationError):
-            User(
+            UserResponse(
                 id="not-a-uuid",
                 first_name="Jane",
                 last_name="Doe",
@@ -98,7 +98,7 @@ class TestUser:
             )
 
     def test_empty_roles_list_is_valid(self, user_id: UUID) -> None:
-        user = User(
+        user = UserResponse(
             id=user_id,
             first_name="Jane",
             last_name="Doe",
@@ -109,7 +109,7 @@ class TestUser:
         assert user.roles == []
 
     def test_model_copy_updates_fields(self, valid_user_kwargs: dict) -> None:
-        user = User(**valid_user_kwargs)
+        user = UserResponse(**valid_user_kwargs)
         updated = user.model_copy(update={"first_name": "Janet"})
 
         assert updated.first_name == "Janet"

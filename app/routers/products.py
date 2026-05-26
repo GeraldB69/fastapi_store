@@ -6,10 +6,10 @@ from fastapi import APIRouter, HTTPException
 
 from app.models.products import (
     Category,
-    CreateProduct,
-    Product,
+    ProductCreate,
+    ProductResponse,
     ProductReplace,
-    UpdateProduct,
+    ProductUpdate,
 )
 
 import logging
@@ -21,30 +21,30 @@ logger = logging.getLogger("uvicorn.error")
 router = APIRouter(prefix="/api/v1/products", tags=["Product"])
 
 # In-memory store — no database yet.
-products_db: List[Product] = [
-    Product(
+products_db: List[ProductResponse] = [
+    ProductResponse(
         id=uuid4(),
         name="Laptop Pro 15",
         description="High-performance laptop",
         price=Decimal("1299.99"),
         stock=10,
-        category=Category.electronics,
+        category=Category.ELECTRONICS,
     ),
-    Product(
+    ProductResponse(
         id=uuid4(),
         name="Running Shoes X",
         description="Lightweight running shoes",
         price=Decimal("89.90"),
         stock=50,
-        category=Category.sport,
+        category=Category.SPORT,
     ),
-    Product(
+    ProductResponse(
         id=uuid4(),
         name="Winter Jacket",
         description=None,
         price=Decimal("149.00"),
         stock=0,
-        category=Category.clothing,
+        category=Category.CLOTHING,
         is_active=False,  # out of stock → deactivated
     ),
 ]
@@ -61,7 +61,7 @@ def _find_product_index(product_id: UUID) -> int | None:
 # --- Collection ---
 
 
-@router.get("", response_model=List[Product])
+@router.get("", response_model=List[ProductResponse])
 def get_products(active_only: bool = False):
     """
     List all products.
@@ -73,10 +73,10 @@ def get_products(active_only: bool = False):
     return products_db
 
 
-@router.post("", response_model=Product, status_code=201)
-def create_product(payload: CreateProduct):
+@router.post("", response_model=ProductResponse, status_code=201)
+def create_product(payload: ProductCreate):
     """Create a product. The id is server-generated."""
-    new_product = Product(id=uuid4(), **payload.model_dump())
+    new_product = ProductResponse(id=uuid4(), **payload.model_dump())
     products_db.append(new_product)
     logger.info("POST /api/v1/products - created id=%s", new_product.id)
     return new_product
@@ -87,7 +87,7 @@ def create_product(payload: CreateProduct):
 
 @router.get(
     "/{product_id}",
-    response_model=Product,
+    response_model=ProductResponse,
     responses={404: {"description": "Product not found"}},
 )
 def get_product(product_id: UUID):
@@ -100,10 +100,10 @@ def get_product(product_id: UUID):
 
 @router.patch(
     "/{product_id}",
-    response_model=Product,
+    response_model=ProductResponse,
     responses={404: {"description": "Product not found"}},
 )
-def patch_product(product_id: UUID, payload: UpdateProduct):
+def patch_product(product_id: UUID, payload: ProductUpdate):
     """
     Partial update (PATCH).
     Can be used to deactivate a product (is_active=false) without deleting it.
@@ -121,7 +121,7 @@ def patch_product(product_id: UUID, payload: UpdateProduct):
 
 @router.put(
     "/{product_id}",
-    response_model=Product,
+    response_model=ProductResponse,
     responses={404: {"description": "Product not found"}},
 )
 def replace_product(product_id: UUID, payload: ProductReplace):
@@ -130,7 +130,7 @@ def replace_product(product_id: UUID, payload: ProductReplace):
     if index is None:
         raise HTTPException(status_code=404, detail=f"Product {product_id} not found")
 
-    products_db[index] = Product(id=product_id, **payload.model_dump())
+    products_db[index] = ProductResponse(id=product_id, **payload.model_dump())
     logger.info("PUT /api/v1/products/%s", product_id)
     return products_db[index]
 

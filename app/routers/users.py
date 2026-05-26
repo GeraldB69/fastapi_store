@@ -4,11 +4,11 @@ from uuid import UUID, uuid4
 from fastapi import APIRouter, HTTPException
 
 from app.models.users import (
-    CreateUser,
+    UserCreate,
     Gender,
     Role,
-    UpdateUser,
-    User,
+    UserUpdate,
+    UserResponse,
     UserReplace,
 )
 
@@ -19,22 +19,22 @@ logger = logging.getLogger("uvicorn.error")
 router = APIRouter(prefix="/api/v1/users", tags=["User"])
 
 # In-memory store — no database yet.
-users_db: List[User] = [
-    User(
+users_db: List[UserResponse] = [
+    UserResponse(
         id=uuid4(),
         first_name="John",
         last_name="Doe",
         gender=Gender.male,
         roles=[Role.admin],
     ),
-    User(
+    UserResponse(
         id=uuid4(),
         first_name="Jane",
         last_name="Doe",
         gender=Gender.female,
         roles=[Role.customer],
     ),
-    User(
+    UserResponse(
         id=uuid4(),
         first_name="James",
         last_name="Gabriel",
@@ -55,17 +55,17 @@ def _find_user_index(user_id: UUID) -> int | None:
 # --- Collection ---
 
 
-@router.get("", response_model=List[User])
+@router.get("", response_model=List[UserResponse])
 def get_users():
     """List all users."""
     logger.info("GET /api/v1/users - %s user(s)", len(users_db))
     return users_db
 
 
-@router.post("", response_model=User, status_code=201)
-def create_user(payload: CreateUser):
+@router.post("", response_model=UserResponse, status_code=201)
+def create_user(payload: UserCreate):
     """Create a user. The id is always server-generated."""
-    new_user = User(id=uuid4(), **payload.model_dump())
+    new_user = UserResponse(id=uuid4(), **payload.model_dump())
     users_db.append(new_user)
     logger.info("POST /api/v1/users - created id=%s", new_user.id)
     return new_user
@@ -76,7 +76,7 @@ def create_user(payload: CreateUser):
 
 @router.get(
     "/{user_id}",
-    response_model=User,
+    response_model=UserResponse,
     responses={404: {"description": "User not found"}},
 )
 def get_user(user_id: UUID):
@@ -89,10 +89,10 @@ def get_user(user_id: UUID):
 
 @router.patch(
     "/{user_id}",
-    response_model=User,
+    response_model=UserResponse,
     responses={404: {"description": "User not found"}},
 )
-def patch_user(user_id: UUID, payload: UpdateUser):
+def patch_user(user_id: UUID, payload: UserUpdate):
     """
     Partial update (PATCH).
     Only fields present in the JSON body are modified (exclude_unset).
@@ -111,7 +111,7 @@ def patch_user(user_id: UUID, payload: UpdateUser):
 
 @router.put(
     "/{user_id}",
-    response_model=User,
+    response_model=UserResponse,
     responses={404: {"description": "User not found"}},
 )
 def replace_user(user_id: UUID, payload: UserReplace):
@@ -120,7 +120,7 @@ def replace_user(user_id: UUID, payload: UserReplace):
     if index is None:
         raise HTTPException(status_code=404, detail=f"User {user_id} not found")
 
-    users_db[index] = User(id=user_id, **payload.model_dump())
+    users_db[index] = UserResponse(id=user_id, **payload.model_dump())
     logger.info("PUT /api/v1/users/%s", user_id)
     return users_db[index]
 
